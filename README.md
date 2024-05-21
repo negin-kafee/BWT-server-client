@@ -20,7 +20,7 @@ The server accepts a DNA sequence and returns its Burrows Wheeler Transform (BWT
 
 1. Clone the repository:
    ```sh
-   git clone <repository-url>
+   git clone https://github.com/negin-kafee/BWT-server-client.git
 
 2. Navigate to the project directory:
     cd bwt_project
