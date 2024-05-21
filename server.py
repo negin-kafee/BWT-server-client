@@ -2,7 +2,6 @@ import socket
 import threading
 import json
 import argparse
-import re
 
 def read_config(config_file):
     """Reads the configuration file to get the host and port."""
@@ -52,15 +51,21 @@ def handle_client(client_socket):
 def start_server(host, port):
     """Starts the server to listen for client connections."""
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind((host, port))
-    server.listen(5)
-    print(f"Server started on {host}:{port}")
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        server.bind((host, port))
+        server.listen(5)
+        print(f"Server started on {host}:{port}")
 
-    while True:
-        client_socket, addr = server.accept()
-        print(f"Connection from {addr}")
-        client_handler = threading.Thread(target=handle_client, args=(client_socket,))
-        client_handler.start()
+        while True:
+            client_socket, addr = server.accept()
+            print(f"Connection from {addr}")
+            client_handler = threading.Thread(target=handle_client, args=(client_socket,))
+            client_handler.start()
+    except OSError as e:
+        print(f"Error: {e}")
+        if e.errno == 48:  # Address already in use
+            print(f"Port {port} is already in use. Please use a different port.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="BWT Server")
@@ -69,4 +74,3 @@ if __name__ == "__main__":
 
     host, port = read_config(args.config)
     start_server(host, port)
-
